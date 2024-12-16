@@ -1,7 +1,7 @@
 class Compte:
     def __init__(self, nom, marchandise, quantite, pvunitaire, capital, prixAchat, reste, dette1, depenseUnitaire):
         self.nom = nom
-        self.marchandise = marchandise  # Correction du nom de l'attribut
+        self.marchandise = marchandise  
         self.quantite = quantite
         self.pvunitaire = pvunitaire
         self.capital = capital
@@ -10,7 +10,7 @@ class Compte:
         self.dette1 = dette1
         self.depenseUnitaire = depenseUnitaire
         self.prixvente = 0
-        self.res_brut = 0  # Correction du nom pour respecter le style snake_case
+        self.res_brut = 0  
         self.dep_total = 0
         self.dette_total = 0
         self.benefice = 0
