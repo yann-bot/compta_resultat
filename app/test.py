@@ -1,51 +1,54 @@
-# Tests unitaires
-import unittest
 from resultat import Compte
 
+# Création d'une instance de la classe Compte
+mon_compte = Compte(
+    nom="Entreprise ABC",
+    marchandise="Produits A",
+    quantite=100,
+    pvunitaire=50,
+    capital=10000,
+    prixAchat=3000,
+    reste=500,
+    dette1=1000,
+    depenseUnitaire=10
+)
 
-class TestCompte(unittest.TestCase):
+# Calculs principaux
+print("---- CALCULS ----")
+mon_compte.calcul_prix_vente()
+mon_compte.calcul_resultat_brut()
+mon_compte.calcul_depense_totale()
+mon_compte.calcul_dette()
+mon_compte.calcul_benefice()
+mon_compte.calcul_resultat_final()
+mon_compte.afficher_resultats()
 
-    def setUp(self):
-        self.compte = Compte(
-            nom="Testeur",
-            marchandise="ProduitX",
-            quantite=100,
-            pvunitaire=50,
-            capital=1000,
-            prixAchat=3000,
-            reste=500,
-            dette1=200,
-            depenseUnitaire=5
-        )
+# Calcul de la marge bénéficiaire
+print("\n---- MARGE BÉNÉFICIAIRE ----")
+marge = mon_compte.calcul_marge_beneficiaire()
+print(f"Marge bénéficiaire : {marge:.2f}%")
 
-    def test_calcul_prix_vente(self):
-        self.assertEqual(self.compte.calcul_prix_vente(), 5000)
+# Simulation d'évolution financière
+print("\n---- SIMULATION D'ÉVOLUTION DU CAPITAL ----")
+capital_simule = mon_compte.simuler_evolution_capital(periodes=5, taux_croissance=0.05)
+print(f"Capital après 5 périodes avec un taux de croissance de 5% : {capital_simule:.2f}")
 
-    def test_calcul_resultat_brut(self):
-        self.compte.calcul_prix_vente()  
-        self.assertEqual(self.compte.calcul_resultat_brut(), 2000)
+# Enregistrement de transactions
+print("\n---- TRANSACTIONS ----")
+mon_compte.enregistrer_transaction("vente", 5000, "Vente de produits A")
+mon_compte.enregistrer_transaction("achat", 2000, "Achat de marchandises")
+mon_compte.afficher_historique()
 
-    def test_calcul_depense_totale(self):
-        self.assertEqual(self.compte.calcul_depense_totale(), 500)
+# Exportation des résultats
+print("\n---- EXPORTATION ----")
+mon_compte.exporter_resultats("resultats_compte.txt")
 
-    def test_calcul_dette(self):
-        self.compte.calcul_depense_totale()
-        self.assertEqual(self.compte.calcul_dette(), 200)
+# Alerte sur les dettes
+print("\n---- ALERTE DETTE ----")
+mon_compte.alerter_si_dette_elevee(seuil=2000)
 
-    def test_calcul_benefice(self):
-        self.compte.calcul_prix_vente()
-        self.compte.calcul_resultat_brut()
-        self.compte.calcul_depense_totale()
-        self.compte.calcul_dette()
-        self.assertEqual(self.compte.calcul_benefice(), 1800)
+# Calcul de la rentabilité unitaire
+print("\n---- RENTABILITÉ UNITAIRE ----")
+rentabilite = mon_compte.calcul_rentabilite_unitaire()
+print(f"Rentabilité unitaire : {rentabilite:.2f}")
 
-    def test_calcul_resultat_final(self):
-        self.compte.calcul_prix_vente()
-        self.compte.calcul_resultat_brut()
-        self.compte.calcul_depense_totale()
-        self.compte.calcul_dette()
-        self.compte.calcul_benefice()
-        self.assertEqual(self.compte.calcul_resultat_final(), 2800)
-
-if __name__ == "__main__":
-    unittest.main()

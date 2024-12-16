@@ -3,5 +3,5 @@
 from index import *
 from resultat import *
 
-# Déclaration de la version du package
+#Versions
 __version__ = "0.1.0"
