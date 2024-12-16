@@ -1,5 +1,6 @@
 # Tests unitaires
 import unittest
+from resultat import Compte
 
 
 class TestCompte(unittest.TestCase):
