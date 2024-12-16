@@ -1,108 +1,106 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
-import csv
-from datetime import datetime
+from tkinter import messagebox
+from tkinter.filedialog import asksaveasfilename
+from resultat import Compte
 
-class ComptabiliteApp:
+class InterfaceCompte:
     def __init__(self, root):
         self.root = root
-        self.root.title("Application de Comptabilité")
-        self.root.geometry("800x600")
-        
-        # Variables
-        self.transactions = []
-        self.solde = 0
+        self.root.title("Gestion de Compte")
 
-        # Frame des entrées
-        self.frame_entrées = tk.Frame(root)
-        self.frame_entrées.pack(pady=10, fill=tk.X)
+        # Variables pour les champs de saisie
+        self.nom = tk.StringVar()
+        self.marchandise = tk.StringVar()
+        self.quantite = tk.IntVar()
+        self.pvunitaire = tk.DoubleVar()
+        self.capital = tk.DoubleVar()
+        self.prixAchat = tk.DoubleVar()
+        self.reste = tk.DoubleVar()
+        self.dette1 = tk.DoubleVar()
+        self.depenseUnitaire = tk.DoubleVar()
 
-        tk.Label(self.frame_entrées, text="Montant:").grid(row=0, column=0, padx=5)
-        self.entry_montant = tk.Entry(self.frame_entrées)
-        self.entry_montant.grid(row=0, column=1, padx=5)
+        # Configuration des champs d'entrée
+        tk.Label(root, text="Nom").grid(row=0, column=0)
+        tk.Entry(root, textvariable=self.nom).grid(row=0, column=1)
 
-        tk.Label(self.frame_entrées, text="Catégorie:").grid(row=0, column=2, padx=5)
-        self.entry_categorie = tk.Entry(self.frame_entrées)
-        self.entry_categorie.grid(row=0, column=3, padx=5)
+        tk.Label(root, text="Marchandise").grid(row=1, column=0)
+        tk.Entry(root, textvariable=self.marchandise).grid(row=1, column=1)
 
-        tk.Label(self.frame_entrées, text="Type:").grid(row=0, column=4, padx=5)
-        self.type_var = tk.StringVar(value="Revenu")
-        ttk.Combobox(self.frame_entrées, textvariable=self.type_var, values=["Revenu", "Dépense"]).grid(row=0, column=5, padx=5)
+        tk.Label(root, text="Quantité").grid(row=2, column=0)
+        tk.Entry(root, textvariable=self.quantite).grid(row=2, column=1)
 
-        tk.Label(self.frame_entrées, text="Date (YYYY-MM-DD):").grid(row=0, column=6, padx=5)
-        self.entry_date = tk.Entry(self.frame_entrées)
-        self.entry_date.grid(row=0, column=7, padx=5)
+        tk.Label(root, text="Prix Vente Unitaire").grid(row=3, column=0)
+        tk.Entry(root, textvariable=self.pvunitaire).grid(row=3, column=1)
 
-        self.btn_ajouter = tk.Button(self.frame_entrées, text="Ajouter", command=self.ajouter_transaction)
-        self.btn_ajouter.grid(row=0, column=8, padx=5)
+        tk.Label(root, text="Capital").grid(row=4, column=0)
+        tk.Entry(root, textvariable=self.capital).grid(row=4, column=1)
 
-        # Solde
-        self.label_solde = tk.Label(root, text="Solde actuel: 0.00 €", font=("Arial", 16))
-        self.label_solde.pack(pady=10)
+        tk.Label(root, text="Prix Achat").grid(row=5, column=0)
+        tk.Entry(root, textvariable=self.prixAchat).grid(row=5, column=1)
 
-        # Historique
-        self.tableau = ttk.Treeview(root, columns=("Montant", "Catégorie", "Type", "Date"), show="headings")
-        self.tableau.heading("Montant", text="Montant")
-        self.tableau.heading("Catégorie", text="Catégorie")
-        self.tableau.heading("Type", text="Type")
-        self.tableau.heading("Date", text="Date")
-        self.tableau.pack(pady=10, fill=tk.BOTH, expand=True)
+        tk.Label(root, text="Reste").grid(row=6, column=0)
+        tk.Entry(root, textvariable=self.reste).grid(row=6, column=1)
 
-        # Boutons de gestion
-        self.frame_gestion = tk.Frame(root)
-        self.frame_gestion.pack(pady=10)
+        tk.Label(root, text="Dette").grid(row=7, column=0)
+        tk.Entry(root, textvariable=self.dette1).grid(row=7, column=1)
 
-        tk.Button(self.frame_gestion, text="Sauvegarder", command=self.sauvegarder_transactions).pack(side=tk.LEFT, padx=5)
-        tk.Button(self.frame_gestion, text="Charger", command=self.charger_transactions).pack(side=tk.LEFT, padx=5)
+        tk.Label(root, text="Dépense Unitaire").grid(row=8, column=0)
+        tk.Entry(root, textvariable=self.depenseUnitaire).grid(row=8, column=1)
 
-    def ajouter_transaction(self):
-        try:
-            montant = float(self.entry_montant.get())
-            categorie = self.entry_categorie.get()
-            type_transaction = self.type_var.get()
-            date_str = self.entry_date.get()
-            date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        # Bouton pour calculer et afficher les résultats
+        tk.Button(root, text="Calculer", command=self.calculer).grid(row=9, column=0, columnspan=2)
 
-            if type_transaction == "Dépense":
-                montant = -montant
+        # Bouton pour exporter les résultats
+        tk.Button(root, text="Exporter", command=self.exporter).grid(row=10, column=0, columnspan=2)
 
-            self.transactions.append((montant, categorie, type_transaction, date))
-            self.solde += montant
-            self.mise_a_jour_ui()
-        except ValueError as e:
-            messagebox.showerror("Erreur", "Veuillez entrer des données valides.")
+        # Zone pour afficher les résultats
+        self.resultats = tk.Text(root, height=10, width=50)
+        self.resultats.grid(row=11, column=0, columnspan=2)
 
-    def mise_a_jour_ui(self):
-        self.label_solde.config(text=f"Solde actuel: {self.solde:.2f} €")
-        for row in self.tableau.get_children():
-            self.tableau.delete(row)
-        for transaction in self.transactions:
-            self.tableau.insert("", tk.END, values=transaction)
+    def calculer(self):
+        # Création de l'objet Compte
+        compte = Compte(
+            nom=self.nom.get(),
+            marchandise=self.marchandise.get(),
+            quantite=self.quantite.get(),
+            pvunitaire=self.pvunitaire.get(),
+            capital=self.capital.get(),
+            prixAchat=self.prixAchat.get(),
+            reste=self.reste.get(),
+            dette1=self.dette1.get(),
+            depenseUnitaire=self.depenseUnitaire.get(),
+        )
 
-    def sauvegarder_transactions(self):
-        fichier = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+        # Calculs
+        compte.calcul_prix_vente()
+        compte.calcul_resultat_brut()
+        compte.calcul_depense_totale()
+        compte.calcul_dette()
+        compte.calcul_benefice()
+        compte.calcul_resultat_final()
+
+        # Affichage des résultats
+        self.resultats.delete(1.0, tk.END)
+        self.resultats.insert(tk.END, f"Prix de vente total: {compte.prixvente}\n")
+        self.resultats.insert(tk.END, f"Résultat brut: {compte.res_brut}\n")
+        self.resultats.insert(tk.END, f"Dépenses totales: {compte.dep_total}\n")
+        self.resultats.insert(tk.END, f"Dette totale: {compte.dette_total}\n")
+        self.resultats.insert(tk.END, f"Bénéfice: {compte.benefice}\n")
+        self.resultats.insert(tk.END, f"Résultat final: {compte.res_final}\n")
+
+        self.compte = compte  # Sauvegarde l'objet pour l'exportation
+
+    def exporter(self):
+        if not hasattr(self, 'compte'):
+            messagebox.showerror("Erreur", "Aucun calcul effectué !")
+            return
+
+        fichier = asksaveasfilename(defaultextension=".txt", filetypes=[("Fichiers texte", "*.txt")])
         if fichier:
-            with open(fichier, "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["Montant", "Catégorie", "Type", "Date"])
-                writer.writerows(self.transactions)
-            messagebox.showinfo("Succès", "Transactions sauvegardées avec succès.")
+            self.compte.exporter_resultats(fichier)
+            messagebox.showinfo("Succès", f"Résultats exportés dans {fichier}")
 
-    def charger_transactions(self):
-        fichier = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-        if fichier:
-            with open(fichier, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                next(reader)  # Skip header
-                self.transactions = []
-                self.solde = 0
-                for row in reader:
-                    montant, categorie, type_transaction, date_str = row
-                    self.transactions.append((float(montant), categorie, type_transaction, datetime.strptime(date_str, "%Y-%m-%d").date()))
-                    self.solde += float(montant)
-            self.mise_a_jour_ui()
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = ComptabiliteApp(root)
-    root.mainloop()
+# Lancement de l'application
+root = tk.Tk()
+app = InterfaceCompte(root)
+root.mainloop()
