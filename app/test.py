@@ -6,7 +6,6 @@ from resultat import Compte
 class TestCompte(unittest.TestCase):
 
     def setUp(self):
-        # Configuration initiale d'un objet Compte pour les tests
         self.compte = Compte(
             nom="Testeur",
             marchandise="ProduitX",
@@ -23,14 +22,14 @@ class TestCompte(unittest.TestCase):
         self.assertEqual(self.compte.calcul_prix_vente(), 5000)
 
     def test_calcul_resultat_brut(self):
-        self.compte.calcul_prix_vente()  # Assurez-vous que prixvente est calculé
+        self.compte.calcul_prix_vente()  
         self.assertEqual(self.compte.calcul_resultat_brut(), 2000)
 
     def test_calcul_depense_totale(self):
         self.assertEqual(self.compte.calcul_depense_totale(), 500)
 
     def test_calcul_dette(self):
-        self.compte.calcul_depense_totale()  # Assurez-vous que dep_total est calculé
+        self.compte.calcul_depense_totale()
         self.assertEqual(self.compte.calcul_dette(), 200)
 
     def test_calcul_benefice(self):
