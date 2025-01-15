@@ -2,11 +2,14 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter.filedialog import asksaveasfilename
 from resultat import Compte
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 class InterfaceCompte:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestion de Compte")
+        self.root.configure(bg="green")
 
         # Variables pour les champs de saisie
         self.nom = tk.StringVar()
@@ -19,43 +22,37 @@ class InterfaceCompte:
         self.dette1 = tk.DoubleVar()
         self.depenseUnitaire = tk.DoubleVar()
 
-        # Configuration des champs d'entrée
-        tk.Label(root, text="Nom").grid(row=0, column=0)
-        tk.Entry(root, textvariable=self.nom).grid(row=0, column=1)
+        # Configuration des champs d'entrée avec des couleurs et un layout responsive
+        fields = [
+            ("Nom", self.nom),
+            ("Marchandise", self.marchandise),
+            ("Quantité", self.quantite),
+            ("Prix Vente Unitaire", self.pvunitaire),
+            ("Capital", self.capital),
+            ("Prix Achat", self.prixAchat),
+            ("Reste", self.reste),
+            ("Dette", self.dette1),
+            ("Dépense Unitaire", self.depenseUnitaire),
+        ]
 
-        tk.Label(root, text="Marchandise").grid(row=1, column=0)
-        tk.Entry(root, textvariable=self.marchandise).grid(row=1, column=1)
-
-        tk.Label(root, text="Quantité").grid(row=2, column=0)
-        tk.Entry(root, textvariable=self.quantite).grid(row=2, column=1)
-
-        tk.Label(root, text="Prix Vente Unitaire").grid(row=3, column=0)
-        tk.Entry(root, textvariable=self.pvunitaire).grid(row=3, column=1)
-
-        tk.Label(root, text="Capital").grid(row=4, column=0)
-        tk.Entry(root, textvariable=self.capital).grid(row=4, column=1)
-
-        tk.Label(root, text="Prix Achat").grid(row=5, column=0)
-        tk.Entry(root, textvariable=self.prixAchat).grid(row=5, column=1)
-
-        tk.Label(root, text="Reste").grid(row=6, column=0)
-        tk.Entry(root, textvariable=self.reste).grid(row=6, column=1)
-
-        tk.Label(root, text="Dette").grid(row=7, column=0)
-        tk.Entry(root, textvariable=self.dette1).grid(row=7, column=1)
-
-        tk.Label(root, text="Dépense Unitaire").grid(row=8, column=0)
-        tk.Entry(root, textvariable=self.depenseUnitaire).grid(row=8, column=1)
+        for i, (label_text, var) in enumerate(fields):
+            tk.Label(root, text=label_text, bg="green", fg="white").grid(row=i, column=0, sticky="w", padx=10, pady=5)
+            tk.Entry(root, textvariable=var).grid(row=i, column=1, sticky="ew", padx=10, pady=5)
 
         # Bouton pour calculer et afficher les résultats
-        tk.Button(root, text="Calculer", command=self.calculer).grid(row=9, column=0, columnspan=2)
+        tk.Button(root, text="Calculer", command=self.calculer, bg="darkgreen", fg="white").grid(row=len(fields), column=0, columnspan=2, sticky="ew", padx=10, pady=5)
 
         # Bouton pour exporter les résultats
-        tk.Button(root, text="Exporter", command=self.exporter).grid(row=10, column=0, columnspan=2)
+        tk.Button(root, text="Exporter", command=self.exporter, bg="darkgreen", fg="white").grid(row=len(fields)+1, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
 
         # Zone pour afficher les résultats
-        self.resultats = tk.Text(root, height=10, width=50)
-        self.resultats.grid(row=11, column=0, columnspan=2)
+        self.resultats = tk.Text(root, height=10, width=50, bg="lightgreen", fg="black")
+        self.resultats.grid(row=len(fields)+2, column=0, columnspan=2, sticky="nsew", padx=10, pady=5)
+
+        # Configuration du layout responsive
+        root.columnconfigure(0, weight=1)
+        root.columnconfigure(1, weight=2)
+        root.rowconfigure(len(fields)+2, weight=1)
 
     def calculer(self):
         # Création de l'objet Compte
@@ -95,10 +92,22 @@ class InterfaceCompte:
             messagebox.showerror("Erreur", "Aucun calcul effectué !")
             return
 
-        fichier = asksaveasfilename(defaultextension=".txt", filetypes=[("Fichiers texte", "*.txt")])
+        fichier = asksaveasfilename(defaultextension=".pdf", filetypes=[("Fichiers PDF", "*.pdf")])
         if fichier:
-            self.compte.exporter_resultats(fichier)
-            messagebox.showinfo("Succès", f"Résultats exportés dans {fichier}")
+            try:
+                c = canvas.Canvas(fichier, pagesize=letter)
+                c.drawString(100, 750, f"Nom: {self.compte.nom}")
+                c.drawString(100, 730, f"Marchandise: {self.compte.marchandise}")
+                c.drawString(100, 710, f"Prix de vente total: {self.compte.prixvente}")
+                c.drawString(100, 690, f"Résultat brut: {self.compte.res_brut}")
+                c.drawString(100, 670, f"Dépenses totales: {self.compte.dep_total}")
+                c.drawString(100, 650, f"Dette totale: {self.compte.dette_total}")
+                c.drawString(100, 630, f"Bénéfice: {self.compte.benefice}")
+                c.drawString(100, 610, f"Résultat final: {self.compte.res_final}")
+                c.save()
+                messagebox.showinfo("Succès", f"Résultats exportés dans {fichier}")
+            except Exception as e:
+                messagebox.showerror("Erreur", f"Erreur lors de l'exportation: {str(e)}")
 
 # Lancement de l'application
 root = tk.Tk()
